@@ -51,6 +51,7 @@ The initial response from sbt will be:
 _Multiple main classes detected, select one to run:_
 
  _[1] org.hfgiii.sesportfolio.analytics.AnalyticsMain_
+ 
  _[2] org.hfgiii.sesportfolio.analytics.client.esexamples.EsExamples_
 
 _Enter number:_
