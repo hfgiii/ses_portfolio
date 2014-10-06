@@ -1,6 +1,6 @@
 ## ses_portfolio
 
-This project exists to exercise [elasticsearch](http://elasticsearch.org) and with scala elasticsearch client, [elastic4s](https://github.com/sksamuel/elastic4s). The examples in this project are inspired by problem sets in the [Coursera](https://www.coursera.org/), [Computational Investing, Part I](https://www.coursera.org/course/compinvesting1).
+This project exists to exercise [elasticsearch](http://elasticsearch.org) with scala elasticsearch client, [elastic4s](https://github.com/sksamuel/elastic4s). The examples in this project are inspired by problem sets in the [Coursera](https://www.coursera.org/) course, [Computational Investing, Part I](https://www.coursera.org/course/compinvesting1).
 
 In particular, current examples use elaticsearch to :
 
@@ -20,9 +20,9 @@ In particular, current examples use elaticsearch to :
       }
       ```
       
-    This index is used to calculate sharpe ratio examples explained in the following bullets.
+    This index is used to calculate sharpe ratio examples as explained in the following bullets.
     
-  2. A simple elastic search index that aggregates the daily adjusted closing price (adj_close) for four equities into one document,e.g.:
+  2. A simple elastic search index whose documents contain the daily adjusted closing price (adj_close) for four equitie,e.g.:
   
      ```
      { "date" : "2011-01-03",
@@ -35,9 +35,9 @@ In particular, current examples use elaticsearch to :
         
    This index is used to maximize the sharpe ratio of a four equity portfolio. 
  
-* Calculate the [sharpe ratio](http://en.wikipedia.org/wiki/Sharpe_ratio) for individual equities using elasticsearch [extended stats aggregation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations-metrics-extendedstats-aggregation.html);
-* Calculate the sharpe ratio for multiple equities using elasticsearch [terms aggregation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html) to create one bucket per equity and the extended stats aggregation in each bucket.
-* Calculate the weights of allocation for a four equity portfolio that maximize the sharp ratio for the portfolio as a whole. This example uses and elasticsearch [script field](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-script-fields.html), to distribute the allocation amongst the closing prices. 
+* Calculate the [sharpe ratio](http://en.wikipedia.org/wiki/Sharpe_ratio) for individual equities using the elasticsearch [extended stats aggregation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations-metrics-extendedstats-aggregation.html);
+* Calculate the sharpe ratio for multiple equities using elasticsearch [terms aggregation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html) to create one bucket per equity and then using extended stats aggregation in each bucket to calculate the sharpe ratio for each equity.
+* Calculate the weights of allocation for a four equity portfolio that maximize the sharp ratio for the portfolio as a whole. This example uses the elasticsearch [script field](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-script-fields.html), to distribute the allocation weights amongst the closing prices. 
 
 ### How to Run Examples
 
@@ -46,7 +46,7 @@ From the commandline run the following sbt command:
      sbt "project analytics" "run <args>"     
    ``` 
    
-_The initial response from sbt will be:_
+The initial response from sbt will be:
   
 _Multiple main classes detected, select one to run:_
 
@@ -55,7 +55,7 @@ _Multiple main classes detected, select one to run:_
 
 _Enter number:_
 
-If you enter _2_, there is no need for arguments and `<args>` is empty. The first selection, _org.hfgiii.sesportfolio.analytics.AnalyticsMain_ requires arguments. The following table shows the valid input:
+If one enters _2_, there is no need for arguments and `<args>` is empty. The first selection, _org.hfgiii.sesportfolio.analytics.AnalyticsMain_, requires arguments. The following table shows the valid input:
 
 | Option   | ValidValues | Calculation |
 | :------: | :---------: | :---------: |
@@ -63,6 +63,6 @@ If you enter _2_, there is no need for arguments and `<args>` is empty. The firs
 |   s      | true,false  | calc sharpe ratio |
 |  e       | msft,amzn,ebay,ups| combine with _s_ for single sharpe ratio calc|
 
-Notice: If one enters the _s_ option without a an _e_ option, the sharpe ratio is calculated for four equities: _msft, amzn, ebay, ups_. The _e_ option by itself with a valid equityis a __NOOP__; the example will exit silently. If the equity is not valid, it responds with following message:" '__invalid equity name__' is not a valid equity for sharpe ratio calculation"
+Notice: If one enters the _s_ option without an _e_ option, the sharpe ratio is calculated for four equities: _msft, amzn, ebay, ups_. The _e_ option by itself with a valid equity is a __NOOP__; the example will exit silently. If the equity is not valid, it responds with following message:" '__invalid equity name__' is not a valid equity for sharpe ratio calculation"
 
-Issue: when sbt runs the examples it will throw a stack trace most of the times when the example code shutdowns elasticsearch. Will fix this shortly. 
+Issue: when sbt runs the examples, it will throw a stack trace most of the times when the example code shutdowns elasticsearch. Will fix this shortly. 
