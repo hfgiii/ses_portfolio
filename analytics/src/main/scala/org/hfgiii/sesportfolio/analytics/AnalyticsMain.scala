@@ -12,7 +12,12 @@ object AnalyticsMain {
       o.copy(sharperatio = x,init = x)
     }
     opt[String]('e', "equity") action    { (x, o) =>
-      o.copy(equity = x)
+      if(!equities.contains(x)) {
+        println(s"$x is not a valid equity for sharpe ratio calculation")
+        o.copy(xit = true)
+      } else {
+        o.copy(equity = x)
+      }
     }
     opt[Boolean]('o', "optimize") action { (x, o) =>
       o.copy(optimize = x,init = x)
@@ -24,24 +29,29 @@ object AnalyticsMain {
       o =>
 
         implicit val client =
-          if(o.init)
+          if (o.init)
             initElasticsearch
           else
             emptyClient
 
-        if(o.sharperatio) {
-          if(o.equity == "all") {
-            allSharpeRatios
-          } else {
-            singleSharpRatio(o.equity)
+        if (o.xit)
+          shutdownElasticsearch
+        else {
+
+          if (o.sharperatio) {
+            if (o.equity == "all") {
+              allSharpeRatios
+            } else {
+              singleSharpRatio(o.equity)
+            }
           }
-        }
 
-        if(o.optimize) {
-          optimize
-        }
+          if (o.optimize) {
+            optimize
+          }
 
-        shutdownElasticsearch
+          shutdownElasticsearch
+        }
     }
   }
 }

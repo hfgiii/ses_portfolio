@@ -25,7 +25,7 @@ import scala.util.{Failure, Success}
 package object analytics {
 
   case class Optimized(msft:Double=0d,amzn:Double=0d,ebay:Double=0d,ups:Double=0d,sr:Double=0d)
-  case class Opts(sharperatio:Boolean = false,optimize:Boolean = false,equity:String="all",init:Boolean=false)
+  case class Opts(sharperatio:Boolean = false,optimize:Boolean = false,equity:String="all",init:Boolean=false,xit:Boolean=false)
   case class IndexAccumulator(lastClose:Double = 0d,
                               equityIndex:List[IndexDefinition] = List.empty[IndexDefinition],
                               closingIndex:Map[String,IndexDefinition] = Map.empty[String,IndexDefinition])
