@@ -12,7 +12,7 @@ object AnalyticsMain {
       o.copy(sharperatio = x,init = x)
     }
     opt[String]('e', "equity") action    { (x, o) =>
-      if(!equities.contains(x)) {
+      if(!equitiesForDailies.contains(x)) {
         println(s"$x is not a valid equity for sharpe ratio calculation")
         o.copy(xit = true)
       } else {
@@ -21,6 +21,10 @@ object AnalyticsMain {
     }
     opt[Boolean]('o', "optimize") action { (x, o) =>
       o.copy(optimize = x,init = x)
+    }
+
+    opt[Boolean]('b', "beta") action { (x, o) =>
+      o.copy(beta = x,init = x)
     }
   }
 
@@ -48,6 +52,10 @@ object AnalyticsMain {
 
           if (o.optimize) {
             optimize
+          }
+
+          if(o.beta) {
+            betaCalculationForMSFT
           }
 
           shutdownElasticsearch

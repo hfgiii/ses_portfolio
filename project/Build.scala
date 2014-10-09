@@ -66,9 +66,12 @@ object Deps {
     "ch.qos.logback" % "logback-core" % "1.1.2" % "runtime")
 
   val deps = List(
+    "org.scalanlp" %% "breeze" % "0.9",
+    "org.scalanlp" % "nak_2.11" % "1.3",
     "org.parboiled"    %% "parboiled" % "2.0.1",
     "com.novus"         %% "salat-core" % "1.9.9",
     "com.novus"         %% "salat-util" % "1.9.9",
+    "com.chuusai" %% "shapeless" % "2.0.0",
     "com.sksamuel.elastic4s" % "elastic4s_2.11" % "1.3.2",
     "org.elasticsearch" % "elasticsearch" % "1.3.2",
     "com.github.scopt" %% "scopt" % "3.2.0",

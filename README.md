@@ -22,22 +22,32 @@ In particular, current examples use elaticsearch to :
       
     This index is used to calculate sharpe ratio examples as explained in the following bullets.
     
-  2. A simple elastic search index whose documents contain the daily adjusted closing price (adj_close) for four equitie,e.g.:
+  2. A simple elastic search index whose documents contain the daily rate of return (ex dividend) for four equities,e.g.:
   
      ```
-     { "date" : "2011-01-03",
-        "msft_closing" : 30.26,
-        "amzn_closing" : 184.22,
-        "ebay_closing" : 28.68,
-        "ups_closing"  : 65.48
+     { "date" : "2011-01-04",
+        "msft_ror" : 0.001345,
+        "amzn_ror" : 0.004589,
+        "ebay_ror" : 0.0145,
+        "ups_ror"  : 0.00111
       }
       ```
-        
    This index is used to maximize the sharpe ratio of a four equity portfolio. 
+   
+  3. A simple elastic search index whose documents contain the weekly rate of return (ex dividend) for Micsrosoft (MSFT) and S&P 500 index equities,e.g.:
+  
+     ```
+     {  "date" : "2011-01-14",
+        "msft_ror" : 0.001745,
+        "snp_ror"  : 0.003547
+      }
+      ```
+   This index is used to calclulate for MSFT the beta coefficient of the Capital Asset Pricing Model (CAPM).
  
 * Calculate the [sharpe ratio](http://en.wikipedia.org/wiki/Sharpe_ratio) for individual equities using the elasticsearch [extended stats aggregation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations-metrics-extendedstats-aggregation.html);
 * Calculate the sharpe ratio for multiple equities using elasticsearch [terms aggregation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html) to create one bucket per equity and then using extended stats aggregation in each bucket to calculate the sharpe ratio for each equity.
 * Calculate the weights of allocation for a four equity portfolio that maximize the sharp ratio for the portfolio as a whole. This example uses the elasticsearch [script field](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-script-fields.html), to distribute the allocation weights amongst the closing prices. 
+* Calculate [beta CAPM coefficient](http://en.wikipedia.org/wiki/Capital_asset_pricing_model)for MSFT against the S&P 500 over a 3 year peropd from 2011 to 2014. The calculation uses a linear regression algorithm implemented in [scalanlp](http://www.scalanlp.org), in particular, with the [breeze](https://github.com/scalanlp/breeze) and [nak](https://github.com/scalanlp/nak) components.
 
 ### How to Run Examples
 
@@ -63,6 +73,7 @@ If one enters _2_, there is no need for arguments and `<args>` is empty. The fir
 |   o      | true,false  | optimize portfolio |
 |   s      | true,false  | calc sharpe ratio |
 |  e       | msft,amzn,ebay,ups| combine with _s_ for single sharpe ratio calc|
+|  b       | true        | calc CAPM beta for MSFT|
 
 Notice: If one enters the _s_ option without an _e_ option, the sharpe ratio is calculated for four equities: _msft, amzn, ebay, ups_. The _e_ option by itself with a valid equity is a __NOOP__; the example will exit silently. If the equity is not valid, it responds with following message:" '__invalid equity name__' is not a valid equity for sharpe ratio calculation"
 

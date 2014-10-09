@@ -6,7 +6,6 @@ import org.elasticsearch.search.aggregations.metrics.avg.InternalAvg
 import org.elasticsearch.search.aggregations.metrics.stats.extended.InternalExtendedStats
 import org.hfgiii.sesportfolio.analytics._
 
-
 object EsExamples {
 
   def main(args:Array[String]) {
@@ -22,7 +21,7 @@ object EsExamples {
 
     val _allCls =
       client.execute {
-        count from "portfolio" -> "closing"
+        count from "daily_returns" -> "daily_ror"
       }.await.getCount
 
     println(s"index size is ${_allEq}")
