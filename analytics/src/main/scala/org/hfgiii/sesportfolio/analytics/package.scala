@@ -23,6 +23,7 @@ import org.parboiled2.{ParseError, ParserInput}
 import shapeless._
 import poly._
 import syntax.std.tuple._
+import syntax.typeable._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -90,7 +91,7 @@ package object analytics {
   }
 
   def emptyClient:ElasticClient = ElasticClient.local
-//
+
   def ror(ip:IndexAccumulator,sp:EquityPerformance):Double =
     if(ip.lastClose == 0d || ip.lastEquity.compare(sp.name) != 0) 0d
     else  (sp.adj_close / ip.lastClose) - 1
@@ -112,12 +113,13 @@ package object analytics {
 
   val newDailyRoRIndex = newRoRIndex("daily_returns/daily_ror") _
 
-
   def rorSimple(lastClose:Double,adjClose:Double):Double =
     if(lastClose == 0d) 0d
     else  (adjClose / lastClose) - 1
 
-  object _ror extends ((Double,Double) -> Double) ((rorSimple _).tupled)
+  object _ror extends ((Double,Double) -> Double) ((rorSimple _).tupled) {
+    type Out = Double
+  }
 
   def loadWeeklyPrices(implicit client:ElasticClient) {
 
@@ -137,19 +139,23 @@ package object analytics {
     val idxAccumulator =
       weekZip.foldLeft(RoRIndexAccumulator()) {
         (idx,tpl) =>
-        val (msft,snp) = tpl
+          val (msft,snp) = tpl
 
           val rors =
-            (((idx.lastCloses._1,msft.adj_close),(idx.lastCloses._2,snp.adj_close)) map _ror).asInstanceOf[(Double,Double)]
+            (((idx.lastCloses._1,msft.adj_close),(idx.lastCloses._2,snp.adj_close)) map _ror).cast[(Double,Double)]
 
-          val idxDefinition =
-            index into "weekly_returns/weekly_ror" fields(
+          rors.fold(idx) {
+            rr =>
+
+            val idxDefinition =
+              index into "weekly_returns/weekly_ror" fields(
               "date" -> msft.date,
-              "msft_ror" -> rors._1,
-              "snp_ror"  -> rors._2)
+              "msft_ror" -> rr._1,
+              "snp_ror" ->  rr._2)
 
-          RoRIndexAccumulator(lastCloses = (msft.adj_close,snp.adj_close),
-             rorIndexDefinitions = idxDefinition :: idx.rorIndexDefinitions)
+            RoRIndexAccumulator(lastCloses = (msft.adj_close, snp.adj_close),
+              rorIndexDefinitions = idxDefinition :: idx.rorIndexDefinitions)
+          }
         }
 
     val clsIndexed =
