@@ -17,8 +17,8 @@ import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation.Buck
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms
 import org.elasticsearch.search.aggregations.metrics.stats.extended.InternalExtendedStats
 import org.elasticsearch.search.sort.SortOrder
-import org.hfgiii.sesportfolio.model.EquityPerformance
-import org.hfgiii.sesportfolio.parser.{CSVParboiledParserSB, CSVParserIETFAction}
+import org.hfgiii.sesportfolio.model.{EquityOrder, EquityPrices}
+import org.hfgiii.sesportfolio.parser.{CSVParboiledParserEquityPrice, CSVParboiledParserSB, CSVParserIETFAction}
 import org.parboiled2.{ParseError, ParserInput}
 import shapeless._
 import poly._
@@ -46,14 +46,25 @@ package object analytics {
   case class LinearRegressionArgs(domain:List[(Double,Double)] = List.empty[(Double,Double)],codomain:List[Double] = List.empty[Double])
 
 
-  case class EquityPriceParser(name:String,input: ParserInput) extends CSVParboiledParserSB with CSVParserIETFAction {
+  case class EquityPriceParser(name:String,input: ParserInput) extends CSVParboiledParserEquityPrice with CSVParserIETFAction {
 
-    def parseEquities:List[EquityPerformance] =
+    def parseEquities:List[EquityPrices] =
       csvfile.run() match {
-        case Success(result) => result.asInstanceOf[List[EquityPerformance]]
+        case Success(result) => result.cast[List[EquityPrices]].fold(List.empty[EquityPrices])(prices => prices)
 
-        case Failure(e: ParseError) => println("Expression is not valid: " + formatError(e)) ; List.empty[EquityPerformance]
-        case Failure(e) => println("Unexpected error during parsing run: " + e) ; List.empty[EquityPerformance]
+        case Failure(e: ParseError) => println("Expression is not valid: " + formatError(e)) ; List.empty[EquityPrices]
+        case Failure(e) => println("Unexpected error during parsing run: " + e) ; List.empty[EquityPrices]
+      }
+  }
+
+  case class EquityOrderParser(name:String,input: ParserInput) extends CSVParboiledParserEquityPrice with CSVParserIETFAction {
+
+    def parseEquityOrders:List[EquityOrder] =
+      csvfile.run() match {
+        case Success(result) => result.cast[List[EquityOrder]].fold(List.empty[EquityOrder])(orders => orders)
+
+        case Failure(e: ParseError) => println("Expression is not valid: " + formatError(e)) ; List.empty[EquityOrder]
+        case Failure(e) => println("Unexpected error during parsing run: " + e) ; List.empty[EquityOrder]
       }
   }
 
@@ -92,11 +103,11 @@ package object analytics {
 
   def emptyClient:ElasticClient = ElasticClient.local
 
-  def ror(ip:IndexAccumulator,sp:EquityPerformance):Double =
+  def ror(ip:IndexAccumulator,sp:EquityPrices):Double =
     if(ip.lastClose == 0d || ip.lastEquity.compare(sp.name) != 0) 0d
     else  (sp.adj_close / ip.lastClose) - 1
 
-  def newRoRIndex(indexNType:String)(ip:IndexAccumulator,sp:EquityPerformance,rate_of_return:Double):(String,IndexDefinition) =
+  def newRoRIndex(indexNType:String)(ip:IndexAccumulator,sp:EquityPrices,rate_of_return:Double):(String,IndexDefinition) =
     ip.closingIndex.get(sp.date) match {
       case Some(pidx) => sp.date -> {
         pidx.fields(s"${sp.name}_ror" -> rate_of_return)
@@ -117,14 +128,12 @@ package object analytics {
     if(lastClose == 0d) 0d
     else  (adjClose / lastClose) - 1
 
-  object _ror extends ((Double,Double) -> Double) ((rorSimple _).tupled) {
-    type Out = Double
-  }
+  object _ror extends ((Double,Double) -> Double) ((rorSimple _).tupled)
 
   def loadWeeklyPrices(implicit client:ElasticClient) {
 
     val weeklyEquityPrices =
-      equitiesForWeeklies.foldLeft(Map.empty[String,List[EquityPerformance]]) {
+      equitiesForWeeklies.foldLeft(Map.empty[String,List[EquityPrices]]) {
         (lst,equity) =>
           val finput = this.getClass.getResourceAsStream(s"/${equity}_week.csv")
 
@@ -173,7 +182,7 @@ package object analytics {
 
     val dailyEquityPrices =
 
-      equitiesForDailies.foldLeft(List.empty[EquityPerformance]) {
+      equitiesForDailies.foldLeft(List.empty[EquityPrices]) {
         (lst,equity) =>
           val finput = this.getClass.getResourceAsStream(s"/${equity}_11.csv")
 
