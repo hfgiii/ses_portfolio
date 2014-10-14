@@ -18,7 +18,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.StringTerms
 import org.elasticsearch.search.aggregations.metrics.stats.extended.InternalExtendedStats
 import org.elasticsearch.search.sort.SortOrder
 import org.hfgiii.sesportfolio.model.{EquityOrder, EquityPrices}
-import org.hfgiii.sesportfolio.parser.{CSVParboiledParserEquityPrice, CSVParboiledParserSB, CSVParserIETFAction}
+import org.hfgiii.sesportfolio.parser.{CSVParboiledParserEquityOrder, CSVParboiledParserEquityPrice, CSVParboiledParserSB, CSVParserIETFAction}
 import org.parboiled2.{ParseError, ParserInput}
 import shapeless._
 import poly._
@@ -37,10 +37,10 @@ package object analytics {
   case class RoRIndexAccumulator(lastCloses:(Double,Double) = (0d,0d),
                                  rorIndexDefinitions:List[IndexDefinition] = List.empty[IndexDefinition])
 
-  case class IndexAccumulator(lastEquity:String = "",
-                              lastClose:Double = 0d,
-                              equityIndex:List[IndexDefinition] = List.empty[IndexDefinition],
-                              closingIndex:Map[String,IndexDefinition] = Map.empty[String,IndexDefinition])
+  case class EquityPriceIndexAccumulator(lastEquity:String = "",
+                                         lastClose:Double = 0d,
+                                         equityIndex:List[IndexDefinition] = List.empty[IndexDefinition],
+                                         closingIndex:Map[String,IndexDefinition] = Map.empty[String,IndexDefinition])
 
 
   case class LinearRegressionArgs(domain:List[(Double,Double)] = List.empty[(Double,Double)],codomain:List[Double] = List.empty[Double])
@@ -57,7 +57,7 @@ package object analytics {
       }
   }
 
-  case class EquityOrderParser(name:String,input: ParserInput) extends CSVParboiledParserEquityPrice with CSVParserIETFAction {
+  case class EquityOrderParser(input: ParserInput) extends CSVParboiledParserEquityOrder with CSVParserIETFAction {
 
     def parseEquityOrders:List[EquityOrder] =
       csvfile.run() match {
@@ -69,7 +69,7 @@ package object analytics {
   }
 
 
-  val equitiesForDailies = List("msft","amzn","ebay","ups","snp")
+  val equitiesForDailies = List("aapl","ibm","msft","amzn","ebay","ups","xom","snp")
   val equitiesForWeeklies = List("msft","snp")
 
   def initElasticsearch:ElasticClient = {
@@ -103,11 +103,11 @@ package object analytics {
 
   def emptyClient:ElasticClient = ElasticClient.local
 
-  def ror(ip:IndexAccumulator,sp:EquityPrices):Double =
+  def ror(ip:EquityPriceIndexAccumulator,sp:EquityPrices):Double =
     if(ip.lastClose == 0d || ip.lastEquity.compare(sp.name) != 0) 0d
     else  (sp.adj_close / ip.lastClose) - 1
 
-  def newRoRIndex(indexNType:String)(ip:IndexAccumulator,sp:EquityPrices,rate_of_return:Double):(String,IndexDefinition) =
+  def newRoRIndex(indexNType:String)(ip:EquityPriceIndexAccumulator,sp:EquityPrices,rate_of_return:Double):(String,IndexDefinition) =
     ip.closingIndex.get(sp.date) match {
       case Some(pidx) => sp.date -> {
         pidx.fields(s"${sp.name}_ror" -> rate_of_return)
@@ -178,7 +178,7 @@ package object analytics {
 
   }
   
-  def loadDailyPrices(implicit client:ElasticClient) {
+  def loadDailyPrices(implicit client:ElasticClient):Int = {
 
     val dailyEquityPrices =
 
@@ -193,7 +193,7 @@ package object analytics {
       }
 
     val idxAccumulator =
-      dailyEquityPrices.foldLeft(IndexAccumulator()) {
+      dailyEquityPrices.foldLeft(EquityPriceIndexAccumulator()) {
         (ip,sp) =>
 
           val rate_of_return = ror(ip,sp)
@@ -213,7 +213,7 @@ package object analytics {
             "rate_of_return" -> rate_of_return
             )
 
-          IndexAccumulator(
+          EquityPriceIndexAccumulator(
             lastEquity = sp.name,
             lastClose = sp.adj_close,
             equityIndex = equityIndex :: ip.equityIndex,
@@ -236,6 +236,34 @@ package object analytics {
     }
 
     blockUntilCount(clsIndexed.length,"daily_returns")
+
+    eqIndexed.length
+  }
+  
+  def loadOrders(numDailyPrices:Int)(implicit client:ElasticClient) {
+    val finput = this.getClass.getResourceAsStream(s"/allorders.csv")
+
+    val inputfile: ParserInput = io.Source.fromInputStream(finput).mkString
+
+    val orders = EquityOrderParser(input = inputfile).parseEquityOrders
+
+    val orderIndexed =
+      orders.map {
+         order =>
+           index into "sesportfolio/order" fields (
+              "date" -> order.date,
+              "symbol" -> order.symbol,
+              "ordertype" -> order.ordertype.name,
+              "colume" -> order.volume
+           )
+      }.toSeq
+
+    client execute {
+      bulk(orderIndexed: _ *)
+    }
+
+    blockUntilCount(orderIndexed.length+numDailyPrices,"sesportfolio")
+    
   }
 
   def loadIndexes(implicit client:ElasticClient): Unit = {
@@ -252,7 +280,19 @@ package object analytics {
             "volume" typed LongType,
             "adj_close" typed DoubleType,
             "rate_of_return" typed DoubleType
-            )
+            ),
+           "order" as(
+             "date" typed DateType,
+             "symbol" typed StringType,
+             "orderType" typed StringType,
+             "volume" typed LongType
+             ),
+           "portfolio" as (
+              "date" typed DateType,
+              "symbol" typed StringType,
+              "shares" typed LongType,
+              "value"  typed DoubleType
+             )
           )
       }.await
 
@@ -286,7 +326,9 @@ package object analytics {
 
    // println(createIdxResponse.writeTo(new OutputStreamStreamOutput(System.out)))
 
-    loadDailyPrices
+
+
+    loadOrders (loadDailyPrices)
 
     loadWeeklyPrices
 

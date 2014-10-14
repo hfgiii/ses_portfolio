@@ -66,6 +66,7 @@ trait CSVParserIETFAction extends CSVParserAction {
 }
 
 trait CSVParboiledParserEquityPrice extends CSVParboiledParserSB[EquityPrices] {
+
   def genOutput =
   (r: Seq[String]) =>
     EquityPrices (
@@ -81,9 +82,10 @@ trait CSVParboiledParserEquityPrice extends CSVParboiledParserSB[EquityPrices] {
 }
 
 trait CSVParboiledParserEquityOrder extends CSVParboiledParserSB[EquityOrder] {
+  def name = "order"
   def genOrderType(name:String):OrderType =
-  if(name == "BUY")BuyToOpen
-  else if(name == "SELL")SellToClose
+  if(name == "Buy")BuyToOpen
+  else if(name == "Sell")SellToClose
   else UnknownOrderType
 
 
@@ -102,7 +104,7 @@ trait CSVParboiledParserEquityOrder extends CSVParboiledParserSB[EquityOrder] {
       )
 }
 
-case class CSVParboiledParserSBCLI( name:String, input: ParserInput) extends CSVParboiledParserEquityPrice with CSVParserIETFAction {
+case class CSVParboiledEquityPriceParserCLI( name:String, input: ParserInput) extends CSVParboiledParserEquityPrice with CSVParserIETFAction {
   csvfile.run() match {
     case Success(result) => {
       val lists:List[EquityPrices] = result.asInstanceOf[List[EquityPrices]]
@@ -117,7 +119,34 @@ case class CSVParboiledParserSBCLI( name:String, input: ParserInput) extends CSV
   }
 }
 
-object CSVParserSBCLI  {
+case class CSVParboiledEquityOrderParserCLI(input: ParserInput) extends CSVParboiledParserEquityOrder with CSVParserIETFAction {
+
+  //Salat context for serializing Ordertype case objects
+  implicit val ctx = {
+    val ctx = new Context {
+      val name = "case_object_override"
+    }
+    ctx.registerCaseObjectOverride[OrderType, BuyToOpen.type]("Buy")
+    ctx.registerCaseObjectOverride[OrderType, SellToClose.type]("Sell")
+    ctx.registerCaseObjectOverride[OrderType, UnknownOrderType.type]("Unknown")
+    ctx
+  }
+
+  csvfile.run() match {
+    case Success(result) => {
+      val lists:List[EquityOrder] = result.asInstanceOf[List[EquityOrder]]
+
+      lists.map {   sp =>
+        println(grater[EquityOrder].toPrettyJSON(sp)+",")
+      }
+
+    }
+    case Failure(e: ParseError) => println("Expression is not valid: " + formatError(e))
+    case Failure(e) => println("Unexpected error during parsing run: " + e)
+  }
+}
+
+object CSVEquityPriceParser  {
 
   def equities =
     List("aapl","amzn","ba","c","csco","dis","ebay","etfc","f","fdx",
@@ -131,8 +160,20 @@ object CSVParserSBCLI  {
 
       lazy val inputfile : ParserInput = io.Source.fromInputStream(finput).mkString
 
-      CSVParboiledParserSBCLI(equity,inputfile)
+      CSVParboiledEquityPriceParserCLI(equity,inputfile)
 
     }
+  }
+}
+
+object CSVEquityOrderParser {
+
+  def main(args: Array[String]) {
+
+    val finput = this.getClass.getResourceAsStream(s"/orders.csv")
+
+    lazy val inputfile: ParserInput = io.Source.fromInputStream(finput).mkString
+
+    CSVParboiledEquityOrderParserCLI(inputfile)
   }
 }
