@@ -1,8 +1,7 @@
 package org.hfgiii.sesportfolio.analytics
 
 import scopt.OptionParser
-import java.lang.System._
-
+import org.hfgiii.sesportfolio.analytics.model._
 
 object AnalyticsMain {
 
@@ -25,6 +24,10 @@ object AnalyticsMain {
 
     opt[Boolean]('b', "beta") action { (x, o) =>
       o.copy(beta = x,init = x)
+    }
+
+    opt[Boolean]('t', "trade simulation") action { (x, o) =>
+      o.copy(tradesim = x,init = x)
     }
   }
 
@@ -56,6 +59,10 @@ object AnalyticsMain {
 
           if(o.beta) {
             betaCalculationForMSFT
+          }
+
+          if(o.tradesim) {
+            tradeSimulation
           }
 
           shutdownElasticsearch

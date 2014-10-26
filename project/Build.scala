@@ -34,17 +34,12 @@ object ESPortfolioBuild extends Build {
   lazy val root = Project(
     id = buildParentName,
     base = file("."),
-    settings = BaseSettings) aggregate(analytics4sProject,core4sProject)
+    settings = BaseSettings) aggregate analytics4sProject
 
-
-  lazy val core4sProject =
-    sesPortfolioProject("core").
-      settings(libraryDependencies := deps ++  testingDeps)
 
   lazy val analytics4sProject =
-    sesPortfolioProject("analytics").dependsOn(core4sProject).
+    sesPortfolioProject("analytics").
       settings(libraryDependencies := deps ++  testingDeps)
-
 
 }
 
@@ -66,16 +61,20 @@ object Deps {
     "ch.qos.logback" % "logback-core" % "1.1.2" % "runtime")
 
   val deps = List(
+    "org.hfgiii.ses.common" %% "ses_common_macros" % "0.1.0-SNAPSHOT",
+    "org.hfgiii.ses.common" %% "ses_common" % "0.1.0-SNAPSHOT",
     "org.scalanlp" %% "breeze" % "0.9",
     "org.scalanlp" % "nak_2.11" % "1.3",
     "org.parboiled"    %% "parboiled" % "2.0.1",
     "com.novus"         %% "salat-core" % "1.9.9",
     "com.novus"         %% "salat-util" % "1.9.9",
     "com.chuusai" %% "shapeless" % "2.0.0",
-    "com.sksamuel.elastic4s" % "elastic4s_2.11" % "1.3.2",
-    "org.elasticsearch" % "elasticsearch" % "1.3.2",
+    "com.sksamuel.elastic4s" % "elastic4s_2.11" %  "1.4.0.Beta",  //"1.3.2", //
+    "org.elasticsearch" % "elasticsearch" % "1.4.0.Beta1", //"1.3.2", //
     "com.github.scopt" %% "scopt" % "3.2.0",
-    "org.scalatra.scalate" % "scalate-core_2.11" % "1.7.0")
+    "org.scala-lang.modules" %% "scala-async" % "0.9.2",
+    "org.scalatra.scalate" % "scalate-core_2.11" % "1.7.0",
+    "org.codehaus.groovy"  %  "groovy" % "2.3.7")
 
   val testingDeps = List(
     "org.scalacheck" %% "scalacheck" % "1.11.5" % "test",
