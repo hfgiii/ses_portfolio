@@ -61,8 +61,8 @@ object Deps {
     "ch.qos.logback" % "logback-core" % "1.1.2" % "runtime")
 
   val deps = List(
-    "org.hfgiii.ses.common" %% "ses_common_macros" % "0.1.0-SNAPSHOT",
-    "org.hfgiii.ses.common" %% "ses_common" % "0.1.0-SNAPSHOT",
+    "org.hfgiii" %% "ses_common_macros" % "0.1.0-SNAPSHOT",
+    "org.hfgiii" %% "ses_common" % "0.1.0-SNAPSHOT",
     "org.scalanlp" %% "breeze" % "0.9",
     "org.scalanlp" % "nak_2.11" % "1.3",
     "org.parboiled"    %% "parboiled" % "2.0.1",
