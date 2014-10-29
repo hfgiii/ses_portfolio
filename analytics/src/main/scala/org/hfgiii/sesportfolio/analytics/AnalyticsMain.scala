@@ -1,7 +1,11 @@
 package org.hfgiii.sesportfolio.analytics
 
 import scopt.OptionParser
+import org.hfgiii.ses.common.SesCommon._
 import org.hfgiii.sesportfolio.analytics.model._
+import org.hfgiii.sesportfolio.analytics.capm._
+import org.hfgiii.sesportfolio.analytics.sharperatio._
+import org.hfgiii.sesportfolio.analytics.simulation._
 
 object AnalyticsMain {
 

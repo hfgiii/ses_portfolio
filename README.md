@@ -43,11 +43,23 @@ In particular, current examples use elaticsearch to :
       }
       ```
    This index is used to calclulate for MSFT the beta coefficient of the Capital Asset Pricing Model (CAPM).
+   
+ 4. An portfolio _positions_ index that records all a portfolio's asset positions val for each trading day whithin one year,e.g:
+ 
+   ```
+    {
+       "date" : "2011-01-14",
+       "cash" : 987876.00
+       "aapl" : 123454.00
+    }
+    ```
+   This index is the result of a trading simulation and used to calculate the portfolio's: average daily rate of return, cumulative return, standard deviation, and sharpe ratio
  
 * Calculate the [sharpe ratio](http://en.wikipedia.org/wiki/Sharpe_ratio) for individual equities using the elasticsearch [extended stats aggregation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations-metrics-extendedstats-aggregation.html);
 * Calculate the sharpe ratio for multiple equities using elasticsearch [terms aggregation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html) to create one bucket per equity and then using extended stats aggregation in each bucket to calculate the sharpe ratio for each equity.
 * Calculate the weights of allocation for a four equity portfolio that maximize the sharp ratio for the portfolio as a whole. This example uses the elasticsearch [script field](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-script-fields.html), to distribute the allocation weights amongst the closing prices. 
 * Calculate [beta CAPM coefficient](http://en.wikipedia.org/wiki/Capital_asset_pricing_model)for MSFT against the S&P 500 over a 3 year peropd from 2011 to 2014. The calculation uses a linear regression algorithm implemented in [scalanlp](http://www.scalanlp.org), in particular, with the [breeze](https://github.com/scalanlp/breeze) and [nak](https://github.com/scalanlp/nak) components.
+* From a set of trading orders and equity adjusted closing prices, calculate a portfolio's average daily rate of return, cumulative return, standard deviation, and sharpe ratio.
 
 ### How to Run Examples
 
@@ -74,6 +86,7 @@ If one enters _2_, there is no need for arguments and `<args>` is empty. The fir
 |   s      | true,false  | calc sharpe ratio |
 |  e       | msft,amzn,ebay,ups| combine with _s_ for single sharpe ratio calc|
 |  b       | true        | calc CAPM beta for MSFT|
+|  t       | true        | trade simulation|
 
 Notice: If one enters the _s_ option without an _e_ option, the sharpe ratio is calculated for four equities: _msft, amzn, ebay, ups_. The _e_ option by itself with a valid equity is a __NOOP__; the example will exit silently. If the equity is not valid, it responds with following message:" '__invalid equity name__' is not a valid equity for sharpe ratio calculation"
 

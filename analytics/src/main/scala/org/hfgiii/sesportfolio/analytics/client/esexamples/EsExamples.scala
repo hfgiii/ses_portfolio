@@ -11,8 +11,8 @@ import org.elasticsearch.search.aggregations.metrics.stats.extended.InternalExte
 import org.elasticsearch.search.sort.SortOrder
 import org.hfgiii.sesportfolio.analytics._
 import org.hfgiii.sesportfolio.analytics.model._
-import org.hfgiii.ses.common.macros.Mappable
-import org.hfgiii.ses.common.dsl.response.readers.ResponseReaderDsl._
+import org.hfgiii.ses.common.macros.SesMacros._
+import org.hfgiii.ses.common.SesCommon._
 
 import scala.collection.JavaConversions._
 
