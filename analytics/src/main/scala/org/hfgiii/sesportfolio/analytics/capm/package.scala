@@ -10,7 +10,9 @@ import org.hfgiii.ses.common.macros.SesMacros._
 import org.hfgiii.ses.common.SesCommon._
 import org.hfgiii.sesportfolio.analytics.model.RoRs
 
-package object capm { def linearRegression(domain:DenseMatrix[Double],codomain:DenseVector[Double]): Unit = {
+package object capm {
+
+  def linearRegression(domain:DenseMatrix[Double],codomain:DenseVector[Double]): Unit = {
   {
     //      val features = DenseMatrix.create[Double](3, 3, Array(0, 0, 0, 0.9, 2.5, 3.0, 1.6, 4.0, 5.7)).t
     //      val target = DenseVector[Double](1.0, 2.0, 3.0)

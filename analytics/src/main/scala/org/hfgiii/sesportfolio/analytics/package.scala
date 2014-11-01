@@ -6,7 +6,6 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.mappings.FieldType._
 import com.sksamuel.elastic4s.{ElasticClient, IndexDefinition}
 import org.elasticsearch.common.settings.ImmutableSettings
-import org.hfgiii.ses.common.csv.parser.CSVParserIETFAction
 import org.hfgiii.ses.common.macros.SesMacros._
 import org.hfgiii.ses.common.SesCommon._
 import org.hfgiii.sesportfolio.analytics.model._

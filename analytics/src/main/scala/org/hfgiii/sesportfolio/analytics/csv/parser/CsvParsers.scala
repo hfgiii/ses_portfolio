@@ -2,7 +2,7 @@ package org.hfgiii.sesportfolio.analytics.csv.parser
 
 import com.novus.salat._
 import com.novus.salat.global._
-import org.hfgiii.ses.common.csv.parser._
+import org.hfgiii.ses.common.SesCommon._
 import org.hfgiii.sesportfolio.analytics.model._
 import org.parboiled2.{ParseError, ParserInput}
 
