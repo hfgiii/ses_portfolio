@@ -1,4 +1,4 @@
-package org.hfgiii.sesportfolio.analytics.script
+package org.hfgiii.sesportfolio.analytics.scripted
 
 import java.util.{Map => JMap}
 

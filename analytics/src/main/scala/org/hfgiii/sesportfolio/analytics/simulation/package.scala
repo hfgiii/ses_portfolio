@@ -194,8 +194,8 @@ package object simulation {
           search in "sesportfolio" types "positions" query matchall size 256 sort {
             by field "date" order SortOrder.ASC
           } scriptfields(
-            "balance" script "portfolioscript" lang "native" params Map("fieldName" -> "rate_of_return"),
-            "date" script "doc['date'].value" lang "groovy"
+            script field "balance" script "portfolioscript" lang "native" params Map("fieldName" -> "rate_of_return"),
+            script field "date" script "doc['date'].value" lang "groovy"
             )
         }
       }{

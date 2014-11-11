@@ -30,10 +30,10 @@ object EsExamples {
    // lazy val r      = RoRs()
     //val rCC   = fromMap[RoRs](rMap)
     //val rrCC  = fromMap[RoRSquared](rrMap)
-    val rrrCC = fromMap[RoRCubed](rrrMap)
+    val rrrCC = fromMap[RoRCubed](rrrMap,(str:String) => str)
 
 
-    val _rrrMap = toMap[RoRCubed](rrrCC)
+    val _rrrMap = toMap[RoRCubed](rrrCC,(str:String) => str)
    // val _rrMap = toMap[RoRSquared](rrCC)
 
     val _allEq =
@@ -96,8 +96,8 @@ object EsExamples {
     search in "sesportfolio" types "positions" query matchall size 256 sort {
       by field "date" order SortOrder.ASC
     } scriptfields(
-      "balance" script "portfolioscript" lang "native" params Map("fieldName" -> "rate_of_return"),
-      "date" script "doc['date'].value" lang "groovy"
+       script field "balance" script "portfolioscript" lang "native" params Map("fieldName" -> "rate_of_return"),
+       script field "date" script "doc['date'].value" lang "groovy"
       )
 
     println(s"GORT: ${gort._builder.toString  }") //
@@ -108,8 +108,8 @@ object EsExamples {
         search in "sesportfolio" types "positions" query matchall size 256 sort {
           by field "date" order SortOrder.ASC
         } scriptfields(
-          "balance" script "portfolioscript" lang "native" params Map("fieldName" -> "rate_of_return"),
-          "date" script "doc['date'].value" lang "groovy"
+          script field "balance" script "portfolioscript" lang "native" params Map("fieldName" -> "rate_of_return"),
+          script field "date" script "doc['date'].value" lang "groovy"
           )
       }
       }{
@@ -158,7 +158,7 @@ object EsExamples {
       client.execute {
         search in "sesportfolio" -> "equity" query {
           bool {
-            must (term("date", "2011-01-03"))
+            must (termQuery("date", "2011-01-03"))
           }
         }
       }.await

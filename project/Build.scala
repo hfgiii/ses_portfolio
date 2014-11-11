@@ -69,8 +69,8 @@ object Deps {
     "com.novus"         %% "salat-core" % "1.9.9",
     "com.novus"         %% "salat-util" % "1.9.9",
     "com.chuusai" %% "shapeless" % "2.0.0",
-    "com.sksamuel.elastic4s" % "elastic4s_2.11" %  "1.4.0.Beta",  //"1.3.2", //
-    "org.elasticsearch" % "elasticsearch" % "1.4.0.Beta1", //"1.3.2", //
+    "com.sksamuel.elastic4s" % "elastic4s_2.11" %  "1.4.0",
+    "org.elasticsearch" % "elasticsearch" % "1.4.0",
     "com.github.scopt" %% "scopt" % "3.2.0",
     "org.scala-lang.modules" %% "scala-async" % "0.9.2",
     "org.scalatra.scalate" % "scalate-core_2.11" % "1.7.0",
