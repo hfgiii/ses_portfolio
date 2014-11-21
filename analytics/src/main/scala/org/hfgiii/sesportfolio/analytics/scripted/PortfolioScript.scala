@@ -16,7 +16,7 @@ class PortfolioScript(@Nullable params: JMap[String, AnyRef]) extends AbstractDo
      val tot =
      source.entrySet.foldLeft(0d) {
        (value,x) =>
-         val entry = x.cast[java.util.Map.Entry[String,AnyRef]]
+         val entry = x.cast[JMap.Entry[String,AnyRef]]
          entry.get.getKey match {
            case "date" => println(s"key:${entry.get.getKey} and value:${entry.get.getValue}") ; value
            case _ => entry.get.getValue.cast[Double].fold(value)(_ + value)
